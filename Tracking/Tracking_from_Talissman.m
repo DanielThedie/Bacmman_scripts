@@ -173,7 +173,7 @@ for i = 1:length(fovs) % Loop on all FOVs
 end
 
 
-T = table(trackData);
+T = array2table(trackData, 'VariableNames', {'X_nm', 'Y_nm', 'Frame', 'ParticleID', 'Peak_intensity', 'FOV_number'});
 writetable(T, [folder 'TrackData.csv']);
 
 
