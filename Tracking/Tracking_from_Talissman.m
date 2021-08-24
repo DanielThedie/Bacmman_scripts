@@ -2,12 +2,11 @@
 close all
 clc
 
-addpath '/media/daniel/HDD Daniel/Daniel Thédié/Matlab'
-addpath '/media/daniel/HDD Daniel/Daniel Thédié/Matlab/Bacmman_scripts'
-
+% Dependencies
+% Get_cells.m, findpeak.m, track.m
 
 % Folder containing streams
-folder='/media/daniel/HDD Daniel/Daniel Thédié/Tracking/210820/AL103_85pc/';
+folder = '/media/daniel/HDD Daniel/Daniel ThÃ©diÃ©/Tracking/210820/AL103_85pc/';
 streamName = 'Stream'; % Name of "stream" files to be processed
 
 % Experimental parameters
@@ -15,7 +14,7 @@ param.Xtime = 150;  % objective magnification
 param.pixel_size = 16; % Chip pixel size
 
 % Segmentation file info
-segFile_param.folder = '/media/daniel/HDD Daniel/Daniel Thédié/BACMMAN/210820_AL103_85pc/';
+segFile_param.folder = '/media/daniel/HDD Daniel/Daniel ThÃ©diÃ©/BACMMAN/210820_AL103_85pc/';
 segFile_param.fileName = 'Cells.h5';
 segFile_param.cellsFeature = 'Cells';
 
@@ -147,12 +146,6 @@ for i = 1:length(fovs) % Loop on all FOVs
             
             % Update trackData and add fov and cell number
             trackData = [trackData; tracks];
-            
-            
-            
-            
-            
-            
             
         end
         
