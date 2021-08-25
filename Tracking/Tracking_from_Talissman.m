@@ -2,11 +2,14 @@
 close all
 clc
 
+addpath '/media/daniel/HDD Daniel/Daniel Thédié/Matlab'
+addpath '/media/daniel/HDD Daniel/Daniel Thédié/Matlab/Bacmman_scripts/'
+
 % Dependencies
 % Get_cells.m, findpeak.m, track.m
 
 % Folder containing streams
-folder = '/media/daniel/HDD Daniel/Daniel Thédié/Tracking/210820/AL103_85pc/';
+folder = '/media/daniel/HDD Daniel/Daniel Thédié/Tracking/210820/DT2_85pc/';
 streamName = 'Stream'; % Name of "stream" files to be processed
 
 % Experimental parameters
@@ -14,7 +17,7 @@ param.Xtime = 150;  % objective magnification
 param.pixel_size = 16; % Chip pixel size
 
 % Segmentation file info
-segFile_param.folder = '/media/daniel/HDD Daniel/Daniel Thédié/BACMMAN/210820_AL103_85pc/';
+segFile_param.folder = '/media/daniel/HDD Daniel/Daniel Thédié/BACMMAN/210820_DT2_85pc/';
 segFile_param.fileName = 'Cells.h5';
 segFile_param.cellsFeature = 'Cells';
 
@@ -42,6 +45,8 @@ skipped = 0;
 
 cd(folder)
 fovs = dir([streamName '*']);
+
+maxParticleID = 0;
 
 for i = 1:length(fovs) % Loop on all FOVs
     
@@ -84,7 +89,6 @@ for i = 1:length(fovs) % Loop on all FOVs
     clc
     fprintf('%.0f cells on this FOV\n', length(cells))
     
-    maxParticleID = 0;
     
     for j = 1:length(cells) % Loop over all cells
         
