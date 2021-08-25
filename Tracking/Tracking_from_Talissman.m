@@ -3,7 +3,7 @@ close all
 clc
 
 addpath '../Util'
-addpath 'Tracking_util'
+addpath 'Tracking_util' % These two do not need to be updated if you've downloaded the whole Github repository
 
 % Dependencies
 % Get_cells.m, findpeak.m, track.m
