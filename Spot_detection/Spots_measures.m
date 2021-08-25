@@ -2,6 +2,8 @@
 close all
 clc
 
+addpath '../Util' % Does not need to be changed if you've downloaded the whole Github repository
+
 Bacmman_folder = '/media/daniel/HDD Daniel/Daniel Thédié/BACMMAN/'; % Bacmman working directory
 dataset_name = '210817_cipro'; % Bacmman dataset name
 prefix = 'Im'; % Prefix found in all images before the number (e.g. for Im1, Im2,... set prefix = 'Im';)
