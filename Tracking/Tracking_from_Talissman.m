@@ -2,8 +2,8 @@
 close all
 clc
 
-addpath '/media/daniel/HDD Daniel/Daniel Thédié/Matlab'
-addpath '/media/daniel/HDD Daniel/Daniel Thédié/Matlab/Bacmman_scripts/'
+addpath '../Util'
+addpath 'Tracking_util'
 
 % Dependencies
 % Get_cells.m, findpeak.m, track.m
