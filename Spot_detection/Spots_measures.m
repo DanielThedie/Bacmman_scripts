@@ -6,7 +6,7 @@ clc
 % ObjectInclusionCount -> Containing: Bacteria; To count: Spot_detection -> Name: SpotCount
 % SpineCoordinates -> Set SpineLength to parent: false
 % SpineFeatures -> Bacteria; Scaled: pixel
-% Facultative Measurement:
+% Optional Measurement:
 % ObjectFeatures -> Object class: Bacteria -> Feature: Mean -> Intensity: SOS_signal -> Name: MeanSOS
 
 
