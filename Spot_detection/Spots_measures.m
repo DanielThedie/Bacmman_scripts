@@ -2,10 +2,16 @@
 close all
 clc
 
-addpath '../Util' % Does not need to be changed if you've downloaded the whole Github repository
+% NOTE: this script requires the following measures to have been made and exported
+% ObjectInclusionCount -> Containing: Bacteria; To count: Spot_detection -> Name: SpotCount
+% SpineCoordinates -> Set SpineLength to parent: false
+% SpineFeatures -> Bacteria; Scaled: pixel
+% Facultative Measurement:
+% ObjectFeatures -> Object class: Bacteria -> Feature: Mean -> Intensity: SOS_signal -> Name: MeanSOS
+
 
 Bacmman_folder = '/media/daniel/HDD Daniel/Daniel Thédié/BACMMAN/'; % Bacmman working directory
-dataset_name = '210817_cipro'; % Bacmman dataset name
+dataset_name = '210827_DT7'; % Bacmman dataset name
 prefix = 'Im'; % Prefix found in all images before the number (e.g. for Im1, Im2,... set prefix = 'Im';)
 
 
@@ -18,16 +24,24 @@ dataSpots = readtable([Bacmman_folder dataset_name '/' dataset_name '_1.csv']);
 % Sort datasets chronologically
 for i = 1:height(dataCells)
     name = dataCells.Position(i);
-    name = char(name);
-    idx = name(strfind(name, prefix)+length(prefix):end);
-    dataCells.TrueIdx(i) = str2double(idx);
+    if ~isempty(prefix)
+        name = char(name);
+        idx = name(strfind(name, prefix)+length(prefix):end);
+        dataCells.TrueIdx(i) = str2double(idx);
+    else
+        dataCells.TrueIdx(i) = name;
+    end
 end
 dataCells = sortrows(dataCells, 'TrueIdx', 'ascend');
 for i = 1:height(dataSpots)
     name = dataSpots.Position(i);
-    name = char(name);
-    idx = name(strfind(name, prefix)+length(prefix):end);
-    dataSpots.TrueIdx(i) = str2double(idx);
+    if ~isempty(prefix)
+        name = char(name);
+        idx = name(strfind(name, prefix)+length(prefix):end);
+        dataSpots.TrueIdx(i) = str2double(idx);
+    else
+        dataSpots.TrueIdx(i) = name;
+    end
 end
 dataSpots = sortrows(dataSpots, 'TrueIdx', 'ascend');
 
@@ -66,6 +80,23 @@ ylabel('Number of cells recorded')
 ylim([0 1.2*max(nCellsFOV)])
 
 
+% Histogram of cell lengths
+figure('Color', 'white')
+histogram(dataCells.SpineLength, 'Normalization', 'probability')
+xlabel('Cell length (pixels)')
+ylabel('PDF')
+
+
+% Histogram of SOS signal
+if ismember('MeanSOS', dataCells.Properties.VariableNames)
+    figure('Color', 'white')
+    histogram(dataCells.MeanSOS, 'Normalization', 'probability')
+    xlabel('Mean SOS signal per cell')
+    ylabel('PDF')
+else
+    fprintf('No SOS data found.\n')
+end
+
 % Number of spots per cell histogram
 figure('Color', 'white')
 histogram(dataCells.SpotCount, 'Normalization', 'probability', 'BinWidth', 1,...
@@ -100,17 +131,7 @@ ylim([0 1])
 
 
 
-
-% Histogram of cell lengths
-figure('Color', 'white')
-histogram(dataCells.SpineLength, 'Normalization', 'probability')
-xlabel('Cell length (pixels)')
-ylabel('PDF')
-
-
-
-
-% Heatmap - all cells
+% Heatmap of spot positions in the cell (normalised)
 xypos = [dataSpots.normXpos dataSpots.normYpos];
 mapData = xypos((xypos(:,1) < 2 & xypos(:,1) > -2) & (xypos(:,2) < 2 & xypos(:,2) > -2), :);
 
