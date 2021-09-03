@@ -45,6 +45,10 @@ skipped = 0;
 
 cd(folder)
 fovs = dir([streamName '*']);
+% Sort FOVs so they're in the correct order
+tmp = struct2table(fovs);
+[~, idx] = sortrows(tmp, 'datenum', 'ascend');
+fovs = fovs(idx);
 
 maxParticleID = 0;
 
