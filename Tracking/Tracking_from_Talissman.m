@@ -9,28 +9,27 @@ addpath 'Tracking_util' % These two do not need to be updated if you've download
 % Get_cells.m, findpeak.m, track.m
 
 % Folder containing streams
-folder = '/media/daniel/HDD Daniel/Daniel Thédié/Tracking/210820/AL103_85pc/';
+folder = '/media/daniel/HDD Daniel/Daniel Thédié/Tracking/210820/AL103_100pc/';
 streamName = 'Stream'; % Name of "stream" files to be processed
 
 % Experimental parameters
-param.Xtime = 150;  % objective magnification
+param.Xtime = 150;     % objective magnification
 param.pixel_size = 16; % Chip pixel size
 
 % Segmentation file info
-segFile_param.folder = '/media/daniel/HDD Daniel/Daniel Thédié/BACMMAN/210820_AL103_85pc/';
+segFile_param.folder = '/media/daniel/HDD Daniel/Daniel Thédié/BACMMAN/Tracking/210820_AL103_100pc/';
 segFile_param.fileName = 'Cells.h5';
 segFile_param.cellsFeature = 'Cells';
 
 % Peak detection
-param.thrfpeak = 15;   % Threshold for peak detection
+param.thrfpeak = 10;   % Threshold for peak detection
 param.pnoise = 1;      % noise in peakfind function
 param.psize = 4;       % size group of pixel in peakfind function
 param.pgauss = 5;      % size for gaussian fit peak size in centfind
-param.disp_rate = 80;  % Display 1 frame every disp_rate on a figure for visual control of peak detection
 
 % Tracking
-maxdisp = 8; % Maximum displacement
-minTrackLength = 4; % Minimum length of tracks (shorter tracks will be removed)
+maxdisp = 5;           % Maximum displacement
+minTrackLength = 4;    % Minimum length of tracks (shorter tracks will be removed)
 
 para.mem = 0; % Memory parameter; track won't be cut if the molecule disappears for "mem" frames
 para.good = 2;
@@ -51,6 +50,8 @@ tmp = struct2table(fovs);
 fovs = fovs(idx);
 
 maxParticleID = 0;
+maxCellID = 0;
+cells_numb = zeros(length(fovs), 1);
 
 for i = 1:length(fovs) % Loop on all FOVs
     
@@ -89,6 +90,7 @@ for i = 1:length(fovs) % Loop on all FOVs
     segmentation = Get_cells(segFile_param, i);
     props = {'Area','Centroid','MajorAxisLength','MinorAxisLength', 'PixelList'};
     cells = regionprops(segmentation,props);
+    cells_numb(i) = length(cells);
     
     clc
     fprintf('%.0f cells on this FOV\n', length(cells))
@@ -109,6 +111,7 @@ for i = 1:length(fovs) % Loop on all FOVs
         % 4: particle ID
         % 5: peak intensity (added after the tracking routine)
         % 6: FOV number
+        % 7: cell ID
         
         skip = 0;
         try
@@ -150,14 +153,19 @@ for i = 1:length(fovs) % Loop on all FOVs
             % Include FOV number
             tracks(:,6) = i*ones(length(tracks), 1);
             
+            % Include cell number and increment similarly to particle ID
+            tracks(:,7) = j + maxCellID;
+            
             fprintf('Removed %.0f/%.0f tracks that were shorter than %.0f frames\n', sum(Y < minTrackLength), length(Y), minTrackLength)
             
-            % Update trackData and add fov and cell number
+            % Update trackData
             trackData = [trackData; tracks];
             
         end
         
     end
+    
+    maxCellID = max(trackData(:,7));
     
     fovTracks = trackData(trackData(:,6) == i,:);
     
@@ -180,8 +188,10 @@ for i = 1:length(fovs) % Loop on all FOVs
     
 end
 
+fprintf('Total number of cells: %.0f\n(including %.0f where tracking failed)\n', sum(cells_numb), skipped);
 
-T = array2table(trackData, 'VariableNames', {'X_nm', 'Y_nm', 'Frame', 'ParticleID', 'Peak_intensity', 'FOV_number'});
+
+T = array2table(trackData, 'VariableNames', {'X_nm', 'Y_nm', 'Frame', 'ParticleID', 'Peak_intensity', 'FOV_number', 'CellID'});
 writetable(T, [folder 'TrackData.csv']);
 
 
