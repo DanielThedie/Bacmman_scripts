@@ -11,9 +11,9 @@ clc
 
 
 Bacmman_folder = '/media/daniel/HDD Daniel/Daniel Thédié/BACMMAN/Timelapse/'; % Bacmman working directory
-dataset_name = '210902_AL140_nocipro'; % Bacmman dataset name
-prefix = 'Im'; % Prefix found in all images before the number (e.g. for Im1, Im2,... set prefix = 'Im';)
-files_folder = '/media/daniel/HDD Daniel/Daniel Thédié/Timelapse/210902/AL140_nocipro/'; % Folder where the original images are stored (only used to retrieve their timestamp)
+dataset_name = '210914_DT7'; % Bacmman dataset name
+prefix = 'Im_'; % Prefix found in all images before the number (e.g. for Im1, Im2,... set prefix = 'Im';)
+files_folder = '/media/daniel/HDD Daniel/Daniel Thédié/Timelapse/210914/DT7/'; % Folder where the original images are stored (only used to retrieve their timestamp)
 bf_keyword = '_w10 Brightfield'; % Keyword to identify brightfield images
 
 heatmap_video = 0; % Set to 1 to make a video of the heatmaps of spot positions in time
@@ -52,18 +52,17 @@ dataSpots = sortrows(dataSpots, 'TrueIdx', 'ascend');
 % Fetch timestamps for each FOV
 cd(files_folder)
 listing = dir(['*' bf_keyword '*']);
-listing = struct2table(listing);
-listing = sortrows(listing, 'date');
-dataCells.Time(dataCells.TrueIdx == 1) = 0;
-for i = 1:length(unique(dataCells.TrueIdx))
-    dataCells.Timestamp(dataCells.TrueIdx == i) = datetime(listing.datenum(i), 'ConvertFrom','datenum');
+uCellIdx = unique(dataCells.TrueIdx);
+for i = 1:length(uCellIdx)
+    bfInfo = imfinfo(listing(i).name);
+    dataCells.Timestamp(dataCells.TrueIdx == uCellIdx(i)) = datetime(bfInfo(1).DateTime, 'InputFormat', 'yyyyMMdd HH:mm:ss.SSS');
 end
 dataCells.Time = dataCells.Timestamp - dataCells.Timestamp(1);
 timepoints = unique(dataCells.Time);
 
 % Measures
 fovNum = unique(dataCells.TrueIdx);
-nCellsFOV = grpstats(dataCells.Idx, dataCells.TrueIdx, 'max');
+nCellsFOV = grpstats(dataCells.Idx, dataCells.TrueIdx, 'max') +1;
 nCells = height(dataCells);
 spotFrac = sum(dataCells.SpotCount > 0)/nCells;
 spotFracFOV = grpstats(dataCells.SpotCount > 0, dataCells.TrueIdx, 'sum')./nCellsFOV;
@@ -73,6 +72,7 @@ twoPlusSpot = grpstats(dataCells.SpotCount >= 2, dataCells.TrueIdx, 'sum')./nCel
 if ismember('MeanSOS', dataCells.Properties.VariableNames)
     sosFOV = grpstats(dataCells.MeanSOS, dataCells.TrueIdx, 'mean');
 end
+cellLenFOV = grpstats(dataCells.SpineLength, dataCells.TrueIdx, 'mean');
 
 
 % Normalise spot positions in the cell
@@ -111,11 +111,23 @@ histogram(dataCells.SpineLength, 'Normalization', 'probability')
 xlabel('Cell length (pixels)')
 ylabel('PDF')
 
+% Cell length vs time
+length_movmean = movmean(cellLenFOV, 50);
+figure('Color', 'white')
+hold on
+scatter(minutes(timepoints), cellLenFOV, 15, 'filled', 'MarkerFaceAlpha', 0.8, 'MarkerFaceColor', 'b');
+plot(minutes(timepoints), length_movmean, 'LineWidth', 1.5, 'Color', 'r');
+hold off
+box on
+xlabel('Time (min)')
+ylabel('Average cell length (pixels)')
+
+
 
 % Histogram of SOS signal
 if ismember('MeanSOS', dataCells.Properties.VariableNames)
     figure('Color', 'white')
-    histogram(dataCells.MeanSOS, 'Normalization', 'probability')
+    histogram(dataCells.MeanSOS, 'Normalization', 'probability', 'BinWidth', 200)
     xlabel('Mean SOS signal per cell')
     ylabel('PDF')
 else
@@ -135,6 +147,15 @@ if ismember('MeanSOS', dataCells.Properties.VariableNames)
     ylabel('Average SOS signal')
 end
 
+
+% Cell length/SOS signal correlation
+if ismember('MeanSOS', dataCells.Properties.VariableNames)
+    figure('Color', 'white')
+    scatter(cellLenFOV, sosFOV, 15, 'filled', 'MarkerFaceAlpha', 0.6, 'MarkerFaceColor', 'b');
+    box on
+    xlabel('Cell length (pixels)')
+    ylabel('SOS signal (AU)')
+end
 
 
 % SOS signal vs time
