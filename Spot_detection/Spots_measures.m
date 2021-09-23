@@ -11,9 +11,9 @@ clc
 
 
 Bacmman_folder = '/media/daniel/HDD Daniel/Daniel Thédié/BACMMAN/Timelapse/'; % Bacmman working directory
-dataset_name = '210914_DT7'; % Bacmman dataset name
-prefix = 'Im_'; % Prefix found in all images before the number (e.g. for Im1, Im2,... set prefix = 'Im';)
-files_folder = '/media/daniel/HDD Daniel/Daniel Thédié/Timelapse/210914/DT7/'; % Folder where the original images are stored (only used to retrieve their timestamp)
+dataset_name = '210921_AL140_cipro'; % Bacmman dataset name
+prefix = 'Im'; % Prefix found in all images before the number (e.g. for Im1, Im2,... set prefix = 'Im';)
+files_folder = '/media/daniel/HDD Daniel/Daniel Thédié/Timelapse/210921/AL140_cipro/'; % Folder where the original images are stored (only used to retrieve their timestamp)
 bf_keyword = '_w10 Brightfield'; % Keyword to identify brightfield images
 
 heatmap_video = 0; % Set to 1 to make a video of the heatmaps of spot positions in time
@@ -54,7 +54,7 @@ cd(files_folder)
 listing = dir(['*' bf_keyword '*']);
 uCellIdx = unique(dataCells.TrueIdx);
 for i = 1:length(uCellIdx)
-    bfInfo = imfinfo(listing(i).name);
+    bfInfo = imfinfo(listing(uCellIdx(i)).name);
     dataCells.Timestamp(dataCells.TrueIdx == uCellIdx(i)) = datetime(bfInfo(1).DateTime, 'InputFormat', 'yyyyMMdd HH:mm:ss.SSS');
 end
 dataCells.Time = dataCells.Timestamp - dataCells.Timestamp(1);
